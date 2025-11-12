@@ -8,40 +8,33 @@ strategy:
   parallel: 3
 
 steps:
-# 1 Instalar Java y Maven
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '17'
-    jdkArchitecture: 'x64'
-    jdkSourceOption: 'PreInstalled'
-
+# 1️⃣ Verificar versiones de Java y Maven
 - script: |
-    echo "Instalando Maven..."
-    sudo apt-get update
-    sudo apt-get install -y maven
-    mvn -v
-  displayName: 'Instalar Maven en Linux'
+    echo "Verificando Java y Maven preinstalados en Linux..."
+    java -version
+    mvn -version
+  displayName: 'Verificar entorno Java y Maven'
 
-# 2 Compilar proyecto Maven
+# 2️⃣ Compilar proyecto con Maven (sin tests)
 - script: |
-    echo "Iniciando compilación..."
+    echo "Iniciando compilación Maven..."
     mvn clean package -DskipTests
   displayName: 'Compilar proyecto Maven'
 
-# 3 Ejecutar pruebas (opcional)
+# 3️⃣ Ejecutar pruebas (opcional)
 - script: |
     echo "Ejecutando pruebas..."
     mvn test
   displayName: 'Ejecutar pruebas con Maven'
   continueOnError: true  # Permite que el pipeline no falle si hay test rotos
 
-# 4️ Publicar resultados JUnit (si existen)
+# 4️⃣ Publicar resultados JUnit (si existen)
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
     testRunTitle: 'Resultados de pruebas JUnit'
   condition: succeededOrFailed()
 
-# 5 Mostrar mensaje final
-- script: echo "🚀 Compilación completada exitosamente en Linux con 3 agentes paralelos."
+# 5️⃣ Mensaje final
+- script: echo "Compilación completada exitosamente en Linux con 3 agentes paralelos."
   displayName: 'Finalización'
