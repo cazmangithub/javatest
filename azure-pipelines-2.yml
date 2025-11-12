@@ -2,9 +2,10 @@ trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 jobs:
+#  JOB 1: Compilar el proyecto con Maven
 - job: Build
   displayName: Build Maven Project
   steps:
@@ -21,5 +22,30 @@ jobs:
       Contents: '**/target/*.?(war|jar)'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-  - upload: '$(Build.ArtifactStagingDirectory)'
+  - publish: '$(Build.ArtifactStagingDirectory)'
     artifact: 'drop'
+
+
+#  JOB 2: Despliegue en entorno de máquinas virtuales Linux
+- deployment: VMDeploy
+  displayName: Web deploy to Linux VM
+  dependsOn: Build
+  condition: succeeded()
+  environment:
+    name: 'deploy'              #  Tu environment existente
+    resourceType: VirtualMachine
+    tags: 'linux-app'           #  Etiqueta de las VMs (ajústala según tu entorno)
+
+  strategy:
+    runOnce:                    # Ejecuta una vez por VM
+      deploy:
+        steps:
+        - download: current
+          artifact: drop
+
+        - script: |
+            echo " Iniciando despliegue en máquina virtual Linux..."
+            echo " Artefactos disponibles:"
+            ls -R $(Pipeline.Workspace)/drop
+            echo "✅Despliegue completado en la VM con tag 'linux-app'"
+          displayName: 'Ejecutar despliegue en VM Linux'
