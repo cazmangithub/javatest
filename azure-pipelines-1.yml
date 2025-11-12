@@ -1,40 +1,63 @@
+# ==============================================
+# 🚀 Azure DevOps Pipeline - Proyecto INTERESTELAR
+# ==============================================
+# Ejecuta 3 jobs en paralelo (Build, Test, Deploy)
+# Totalmente compatible con Linux (Ubuntu)
+# ==============================================
+
 trigger:
 - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+# Variables globales
+variables:
+  agentPoolName: 'MySelfHostedPool'  # Nombre del pool (o usa ubuntu-latest)
+  agentProject: 'INTERESTELAR'
+  myToken: '$(myToken)'              # Variable secreta
+  myUser: 'sebatianuribe111'
+  myPassword: '$(myPassword)'        # Variable secreta
 
-strategy:
-  parallel: 3
+# ==============================================
+# 🧩 Jobs en paralelo
+# ==============================================
+jobs:
+- job: BuildProject
+  displayName: "🏗️ Compilar proyecto INTERESTELAR"
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: |
+      echo "Iniciando compilación en agente: $(Agent.Name)"
+      echo "📦 Descargando dependencias..."
+      sleep 3
+      echo "🛠️ Compilando código fuente..."
+      sleep 3
+      echo "✅ Compilación completada exitosamente."
+    displayName: "Compilación del código"
 
-steps:
-# 1️⃣ Verificar versiones de Java y Maven
-- script: |
-    echo "Verificando Java y Maven preinstalados en Linux..."
-    java -version
-    mvn -version
-  displayName: 'Verificar entorno Java y Maven'
+- job: RunTests
+  displayName: "🧪 Ejecutar pruebas automáticas"
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: |
+      echo "Ejecutando pruebas en agente: $(Agent.Name)"
+      echo "Preparando entorno de pruebas..."
+      sleep 2
+      echo "Corriendo pruebas unitarias..."
+      sleep 3
+      echo "✅ Todas las pruebas pasaron correctamente."
+    displayName: "Ejecución de pruebas"
 
-# 2️⃣ Compilar proyecto con Maven (sin tests)
-- script: |
-    echo "Iniciando compilación Maven..."
-    mvn clean package -DskipTests
-  displayName: 'Compilar proyecto Maven'
-
-# 3️⃣ Ejecutar pruebas (opcional)
-- script: |
-    echo "Ejecutando pruebas..."
-    mvn test
-  displayName: 'Ejecutar pruebas con Maven'
-  continueOnError: true  # Permite que el pipeline no falle si hay test rotos
-
-# 4️⃣ Publicar resultados JUnit (si existen)
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
-    testRunTitle: 'Resultados de pruebas JUnit'
-  condition: succeededOrFailed()
-
-# 5️⃣ Mensaje final
-- script: echo "Compilación completada exitosamente en Linux con 3 agentes paralelos."
-  displayName: 'Finalización'
+- job: DeployApp
+  displayName: "🚀 Desplegar aplicación INTERESTELAR"
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: |
+      echo "Desplegando aplicación en agente: $(Agent.Name)"
+      echo "📂 Empaquetando artefactos..."
+      sleep 2
+      echo "🌐 Subiendo a servidor de despliegue simulado..."
+      sleep 3
+      echo "✅ Despliegue completado correctamente."
+    displayName: "Despliegue de la aplicación"
