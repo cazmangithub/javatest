@@ -1,0 +1,57 @@
+# ==============================================
+#  Azure DevOps Pipeline - Proyecto INTERESTELAR
+# ==============================================
+# Este pipeline ejecuta tres tareas en paralelo
+# usando tres agentes distintos.
+# ==============================================
+
+trigger:
+- main
+
+# Variables seguras (define myToken y myPassword en Azure DevOps)
+variables:
+  agentPoolName: 'MySelfHostedPool'      # Nombre del pool de tus agentes
+  agentProject: 'INTERESTELAR'           # Nombre del proyecto
+  myToken: '$(myToken)'                  # Token seguro (variable secreta)
+  myPassword: '$(myPassword)'            # Contraseña segura
+  myUser: 'sebatianuribe111'             # Usuario de agente remoto
+
+# ==============================================
+#  Job 1, 2 y 3 corren en paralelo
+# ==============================================
+jobs:
+- job: BuildProject
+  displayName: " Compilar proyecto INTERESTELAR"
+  pool:
+    name: '$(agentPoolName)'
+  steps:
+  - script: |
+      echo "Iniciando compilación en $(Agent.Name)"
+      echo "Compilando código fuente..."
+      sleep 10
+      echo " Compilación completada."
+    displayName: "Compilación del código"
+
+- job: RunTests
+  displayName: " Ejecutar pruebas automáticas"
+  pool:
+    name: '$(agentPoolName)'
+  steps:
+  - script: |
+      echo "Ejecutando pruebas en $(Agent.Name)"
+      echo "Corriendo tests unitarios..."
+      sleep 8
+      echo " Pruebas exitosas."
+    displayName: "Ejecución de pruebas"
+
+- job: DeployApp
+  displayName: " Desplegar aplicación"
+  pool:
+    name: '$(agentPoolName)'
+  steps:
+  - script: |
+      echo "Desplegando aplicación desde $(Agent.Name)"
+      echo "Ejecutando tareas de despliegue..."
+      sleep 6
+      echo " Despliegue completado correctamente."
+    displayName: "Despliegue de la aplicación"

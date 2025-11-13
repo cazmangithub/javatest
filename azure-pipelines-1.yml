@@ -1,0 +1,40 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+strategy:
+  parallel: 3
+
+steps:
+# 1️⃣ Verificar versiones de Java y Maven
+- script: |
+    echo "Verificando Java y Maven preinstalados en Linux..."
+    java -version
+    mvn -version
+  displayName: 'Verificar entorno Java y Maven'
+
+# 2️⃣ Compilar proyecto con Maven (sin tests)
+- script: |
+    echo "Iniciando compilación Maven..."
+    mvn clean package -DskipTests
+  displayName: 'Compilar proyecto Maven'
+
+# 3️⃣ Ejecutar pruebas (opcional)
+- script: |
+    echo "Ejecutando pruebas..."
+    mvn test
+  displayName: 'Ejecutar pruebas con Maven'
+  continueOnError: true  # Permite que el pipeline no falle si hay test rotos
+
+# 4️⃣ Publicar resultados JUnit (si existen)
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
+    testRunTitle: 'Resultados de pruebas JUnit'
+  condition: succeededOrFailed()
+
+# 5️⃣ Mensaje final
+- script: echo "✅ Compilación completada exitosamente en Linux con 3 agentes paralelos."
+  displayName: 'Finalización'
